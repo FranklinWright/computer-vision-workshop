@@ -4,6 +4,16 @@
 
 ---
 
+## Getting Started
+
+First, you will need to fork this repo, ensuring your fork is public
+
+Then, work on the code in this repo, try to get as much done as you can!
+
+Finally, answer the questions listed at the bottom of the README to be entered into the raffle.
+
+And most importantly, have fun!
+
 ## Setup
 
 ```bash
@@ -37,7 +47,6 @@ cv-workshop/
 │   ├── car.jpg
 │   └── bird.jpg
 ```
-
 ---
 
 ## How to Work Through This
@@ -106,6 +115,15 @@ annotated image on screen
 Check `synset_words.txt` for the full list of 1000 valid labels.
 
 ---
+## Questions - MUST BE DONE TO ENTER RAFFLE
+
+1. In your own words, explain why we preprocess the image with grayscale, blur, and edge detection before passing it to the model. What would happen if we skipped one of those steps?
+
+2. When you ran your classifier on an image, what did it predict and how confident was it? Did the result surprise you — and if it got something wrong, why do you think that happened?
+
+3. We focused on the top prediction (the supposed classification) — but the model outputs 1000 scores simultaneously. What does it mean that the scores for other classes are non-zero? What are those numbers telling you?
+
+4. Where would you take this project next? Think about different models you could swap in, new kinds of images you'd want to classify, or features you'd add to make it more useful in the real world.
 
 ## Reference Docs
 
