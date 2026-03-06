@@ -36,6 +36,13 @@ def load_labels(filepath: str) -> list:
     Returns:
         List of 1000 strings, e.g. ["tench, Tinca tinca", "goldfish", ...]
     """
+    labels = []
+    with open(filepath, 'r') as f:
+        for line in f:
+            # Split the line into words and take everything after the first word
+            label = ' '.join(line.strip().split()[1:])
+            labels.append(label)
+    return labels
     raise NotImplementedError
 
 
@@ -54,6 +61,8 @@ def load_model(prototxt_path: str, caffemodel_path: str):
     Returns:
         A cv2.dnn_Net object.
     """
+    net = cv2.dnn.readNetFromCaffe(prototxt_path, caffemodel_path)
+    return net
     raise NotImplementedError
 
 
@@ -73,6 +82,8 @@ def prepare_blob(roi: np.ndarray) -> np.ndarray:
     Returns:
         ndarray of shape (1, 3, 224, 224), dtype float32.
     """
+    blob = cv2.dnn.blobFromImage(roi, scalefactor=1.0, size=(224, 224), mean=(104, 117, 123), swapRB=False, crop=False)
+    return blob
     raise NotImplementedError
 
 
@@ -87,6 +98,9 @@ def run_inference(net, blob: np.ndarray) -> np.ndarray:
     Returns:
         ndarray of shape (1, 1000).
     """
+    net.setInput(blob)
+    predictions = net.forward()
+    return predictions
     raise NotImplementedError
 
 
@@ -101,6 +115,11 @@ def get_top_prediction(predictions: np.ndarray, labels: list) -> tuple:
     Returns:
         (label: str, confidence: float)
     """
+    # Get the index of the highest confidence score
+    top_index = np.argmax(predictions)
+    top_label = labels[top_index]
+    top_confidence = float(predictions[0, top_index])
+    return top_label, top_confidence
     raise NotImplementedError
 
 
@@ -119,7 +138,11 @@ def get_top_k_predictions(predictions: np.ndarray,
         List of k tuples: [(label: str, confidence: float), ...]
         sorted descending by confidence.
     """
-    raise NotImplementedError
+    # Get the indices of the top-k confidence scores
+    top_k_indices = np.argsort(predictions[0, :])[::-1][:k]
+    # Create a list of (label, confidence) tuples
+    top_k_predictions = [(labels[i], float(predictions[0, i])) for i in top_k_indices]
+    return top_k_predictions
 
 
 def draw_prediction(img: np.ndarray,
@@ -143,6 +166,22 @@ def draw_prediction(img: np.ndarray,
     Returns:
         The annotated image.
     """
+    x, y, w, h = box
+    # Draw the rectangle
+    cv2.rectangle(img, (x, y), (x + w, y + h), color, 2)
+    # Prepare the label text
+    text = f"{label}  {confidence * 100:.1f}%"
+    # Choose a font and scale
+    font = cv2.FONT_HERSHEY_SIMPLEX
+    font_scale = 0.6
+    thickness = 2
+    # Get the size of the text
+    (text_width, text_height), baseline = cv2.getTextSize(text, font, font_scale, thickness)
+    # Draw a filled rectangle behind the text for better visibility
+    cv2.rectangle(img, (x, y - text_height - baseline), (x + text_width, y), color, cv2.FILLED)
+    # Put the text on top of the filled rectangle
+    cv2.putText(img, text, (x, y - baseline), font, font_scale, (0, 0, 0), thickness)
+    return img
     raise NotImplementedError
 
 

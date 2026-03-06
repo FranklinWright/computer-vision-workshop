@@ -30,7 +30,10 @@ def load_image(path: str) -> np.ndarray:
     Returns:
         ndarray of shape (H, W, 3), dtype uint8.
     """
-    raise NotImplementedError
+    img = cv2.imread(path)
+    if img is None:
+        raise FileNotFoundError(f"Image not found: {path}")
+    return img
 
 
 def to_grayscale(img: np.ndarray) -> np.ndarray:
@@ -43,6 +46,7 @@ def to_grayscale(img: np.ndarray) -> np.ndarray:
     Returns:
         ndarray of shape (H, W), dtype uint8.
     """
+    return cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     raise NotImplementedError
 
 
@@ -59,6 +63,9 @@ def blur_image(gray: np.ndarray, kernel_size: int = 5) -> np.ndarray:
     Returns:
         ndarray of same shape as gray, dtype uint8.
     """
+    if kernel_size % 2 == 0 or kernel_size <= 0:
+        raise ValueError("kernel_size must be a positive odd integer.")
+    return cv2.GaussianBlur(gray, (kernel_size, kernel_size), 0)
     raise NotImplementedError
 
 
@@ -76,6 +83,8 @@ def detect_edges(blurred: np.ndarray,
     Returns:
         Binary ndarray of same shape, values 0 or 255.
     """
+    edges = cv2.Canny(blurred, low_threshold, high_threshold)
+    return edges
     raise NotImplementedError
 
 
@@ -92,6 +101,10 @@ def preprocess(img: np.ndarray) -> np.ndarray:
     Returns:
         Binary edge map, shape (H, W), values 0 or 255.
     """
+    gray = to_grayscale(img)
+    blurred = blur_image(gray)
+    edges = detect_edges(blurred)
+    return edges
     raise NotImplementedError
 
 
@@ -108,7 +121,19 @@ def find_subject_contour(edges: np.ndarray, min_area: int = 5000):
     Returns:
         The largest qualifying contour (ndarray of points), or None.
     """
-    raise NotImplementedError
+    contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+    # 2. Filter contours by pixel area 
+    large_contours = [c for c in contours if cv2.contourArea(c) >= min_area]
+
+    # 3. Handle cases where no subjects meet the size requirement
+    if not large_contours:
+        return None
+
+    # 4. Use max() with cv2.contourArea as the key to find the biggest subject [cite: 25]
+    largest_contour = max(large_contours, key=cv2.contourArea)
+    
+    return largest_contour
 
 
 def crop_roi(img: np.ndarray, contour) -> tuple:
@@ -127,6 +152,9 @@ def crop_roi(img: np.ndarray, contour) -> tuple:
         roi: Cropped color image, shape (h, w, 3).
         box: Tuple (x, y, w, h) in pixels.
     """
+    x, y, w, h = cv2.boundingRect(contour)
+    roi = img[y:y+h, x:x+w]
+    return roi, (x, y, w, h)
     raise NotImplementedError
 
 

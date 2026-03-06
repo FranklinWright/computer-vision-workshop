@@ -119,11 +119,18 @@ Check `synset_words.txt` for the full list of 1000 valid labels.
 
 1. In your own words, explain why we preprocess the image with grayscale, blur, and edge detection before passing it to the model. What would happen if we skipped one of those steps?
 
+We preprocess images to help the computer focus on structural shapes rather than raw pixel data. Grayscale conversion simplifies the image because edge detection relies on intensity changes rather than color. Blurring is essential to smooth out noise; without it, the edge detector would mistake every tiny speck for a valid boundary. Edge detection then highlights the object's outline. If any step is skipped, the script might fail to find a clear subject contour, or it might crop the wrong part of the image, leading to a "No subject found" error.
+
 2. When you ran your classifier on an image, what did it predict and how confident was it? Did the result surprise you — and if it got something wrong, why do you think that happened?
+When running the classifier, the output depends on the subject's clarity and how well it fits the 1000 ImageNet categories. For a typical dog or cat image, the model should return the specific breed name with a confidence percentage. If the result is wrong, it is likely because the ROI crop contained too much background or the specific subject looks like a different class in the training data. Results can be surprising when a model picks up on a subtle background detail instead of the main subject.
 
 3. We focused on the top prediction (the supposed classification) — but the model outputs 1000 scores simultaneously. What does it mean that the scores for other classes are non-zero? What are those numbers telling you?
+The model outputs a score for every single class it was trained on. When scores for other classes are non-zero, it means the model sees visual features that are shared across different categories. For example, a "husky" might have a high score, but a "wolf" might also have a non-zero score because they both have pointed ears and similar fur patterns. These numbers represent a probability distribution, telling you how closely the image matches each known pattern.
+
 
 4. Where would you take this project next? Think about different models you could swap in, new kinds of images you'd want to classify, or features you'd add to make it more useful in the real world.
+This project could be expanded by swapping the GoogLeNet model for more modern architectures like ResNet to increase accuracy. To make it useful in the real world, you could implement real-time video processing using a webcam feed or adapt the system for specific tasks like medical diagnosis or autonomous vehicle obstacle detection. Adding a batch summary report already helps in analyzing large datasets, but a graphical dashboard would make the data even more accessible.
+
 
 ## Reference Docs
 
